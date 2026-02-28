@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>滴滴优惠券 · 后台管理</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --orange: #FF6B00;
+  --orange-light: #FF8C38;
+  --orange-dim: rgba(255,107,0,0.12);
+  --orange-glow: rgba(255,107,0,0.25);
+  --dark: #0A0A0A;
+  --panel: #111111;
+  --card: #161616;
+  --surface: #1C1C1C;
+  --border: rgba(255,255,255,0.07);
+  --border-strong: rgba(255,255,255,0.12);
+  --text: #F0F0F0;
+  --muted: #666;
+  --muted2: #444;
+  --success: #00C853;
+  --danger: #FF3B3B;
+  --blue: #3B82F6;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Noto Sans SC', sans-serif;
+  background: var(--dark);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 10;
+}
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
+}
+.logo-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--orange), var(--orange-light));
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.logo-name { font-size: 15px; font-weight: 800; letter-spacing: 0.02em; }
+.logo-ver { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.sidebar-nav { flex: 1; padding: 12px 10px; }
+.nav-group-label {
+  font-size: 10px; color: var(--muted2); font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 12px 10px 6px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.15s;
+  font-size: 13px;
+  user-select: none;
+  margin-bottom: 2px;
+}
+.nav-item:hover { background: var(--surface); color: var(--text); }
+.nav-item.active { background: var(--orange-dim); color: var(--orange); font-weight: 600; }
+.nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 11px; color: var(--muted);
+  text-align: center;
+  line-height: 1.8;
+}
+
+/* Main */
+.main {
+  margin-left: 220px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.topbar {
+  height: 56px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px;
+  background: var(--panel);
+  position: sticky; top: 0; z-index: 5;
+}
+.topbar-title { font-size: 15px; font-weight: 700; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.topbar-badge {
+  background: var(--orange-dim);
+  color: var(--orange);
+  border: 1px solid var(--orange-glow);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px; font-weight: 600;
+}
+
+.content { padding: 28px; flex: 1; }
+
+/* Stats Row */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.stat-card:hover { border-color: var(--border-strong); }
+.stat-card::after {
+  content: attr(data-icon);
+  position: absolute; right: 16px; top: 16px;
+  font-size: 28px; opacity: 0.15;
+}
+.stat-label { font-size: 12px; color: var(--muted); margin-bottom: 10px; font-weight: 500; }
+.stat-val { font-size: 28px; font-weight: 900; letter-spacing: -0.03em; }
+.stat-val.orange { color: var(--orange); }
+.stat-val.green { color: var(--success); }
+.stat-val.blue { color: var(--blue); }
+.stat-sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+/* Toolbar */
+.toolbar {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.search-box {
+  flex: 1; min-width: 200px; max-width: 300px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 14px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-box:focus { border-color: var(--orange); }
+.search-box::placeholder { color: var(--muted); }
+
+.filter-select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 14px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+}
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: 13px; font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--orange), var(--orange-light));
+  color: white;
+  box-shadow: 0 2px 12px var(--orange-glow);
+}
+.btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { border-color: var(--border-strong); }
+.btn-success { background: rgba(0,200,83,0.15); color: var(--success); border: 1px solid rgba(0,200,83,0.3); }
+.btn-danger { background: rgba(255,59,59,0.12); color: var(--danger); border: 1px solid rgba(255,59,59,0.25); }
+.btn-publish {
+  background: linear-gradient(135deg, #7C3AED, #A855F7);
+  color: white;
+  box-shadow: 0 2px 12px rgba(124,58,237,0.35);
+}
+.btn-publish:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 7px; }
+
+.btn-group { display: flex; gap: 8px; margin-left: auto; }
+
+/* Table */
+.table-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.table-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.table-header-title { font-size: 14px; font-weight: 700; }
+.table-count { font-size: 12px; color: var(--muted); }
+
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 11px; font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+
+.city-tag {
+  background: var(--orange-dim);
+  color: var(--orange);
+  border: 1px solid var(--orange-glow);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 12px; font-weight: 700;
+  display: inline-block;
+}
+.amount-badge {
+  font-size: 15px; font-weight: 900; color: var(--orange);
+}
+.status-dot {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px;
+}
+.dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.dot-green { background: var(--success); box-shadow: 0 0 6px var(--success); }
+.dot-yellow { background: #F59E0B; }
+.dot-red { background: var(--danger); }
+.link-cell { color: var(--blue); font-size: 12px; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.progress-bar-wrap { display: flex; align-items: center; gap: 8px; min-width: 120px; }
+.progress-bar {
+  flex: 1; height: 4px; background: var(--surface);
+  border-radius: 2px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, var(--orange), var(--orange-light));
+  transition: width 0.4s;
+}
+.progress-fill.low { background: var(--success); }
+.progress-fill.mid { background: #F59E0B; }
+.progress-fill.high { background: var(--danger); }
+.progress-text { font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+/* Pagination */
+.pagination {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  font-size: 12px; color: var(--muted);
+}
+.page-btns { display: flex; gap: 4px; }
+.page-btn {
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 12px; font-weight: 600;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  transition: all 0.15s;
+}
+.page-btn:hover { border-color: var(--orange); color: var(--orange); }
+.page-btn.active { background: var(--orange); border-color: var(--orange); color: white; }
+
+/* Modal */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 50;
+  display: none;
+  align-items: center; justify-content: center;
+  backdrop-filter: blur(6px);
+  animation: fadeIn 0.2s ease;
+}
+.overlay.show { display: flex; }
+@keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+
+.modal {
+  background: var(--card);
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  width: 560px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideIn 0.25s cubic-bezier(0.32,0.72,0,1);
+}
+.modal-lg { width: 720px; }
+@keyframes slideIn { from { opacity:0; transform: scale(0.95) translateY(10px) } to { opacity:1; transform: scale(1) translateY(0) } }
+
+.modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: var(--card); z-index: 1;
+}
+.modal-title { font-size: 16px; font-weight: 800; }
+.modal-close {
+  width: 30px; height: 30px;
+  border-radius: 8px; background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px; color: var(--muted);
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+}
+.modal-close:hover { color: var(--text); border-color: var(--border-strong); }
+
+.modal-body { padding: 24px; }
+.modal-foot {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: flex-end; gap: 10px;
+}
+
+/* Form */
+.form-group { margin-bottom: 18px; }
+.form-label {
+  display: block; font-size: 12px; font-weight: 700;
+  color: var(--muted); margin-bottom: 7px; letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.form-label .required { color: var(--orange); margin-left: 2px; }
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px var(--orange-dim);
+}
+.form-textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
+
+/* Import area */
+.import-tabs { display: flex; gap: 4px; margin-bottom: 20px; }
+.import-tab {
+  flex: 1; padding: 10px;
+  text-align: center;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  font-size: 13px; font-weight: 600;
+  transition: all 0.15s;
+  background: var(--surface);
+  color: var(--muted);
+}
+.import-tab.active { background: var(--orange-dim); color: var(--orange); border-color: var(--orange-glow); }
+
+.drop-zone {
+  border: 2px dashed var(--border-strong);
+  border-radius: 14px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.drop-zone:hover, .drop-zone.dragover {
+  border-color: var(--orange);
+  background: var(--orange-dim);
+}
+.drop-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; }
+.drop-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.drop-sub { font-size: 12px; color: var(--muted); }
+.drop-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+.template-dl {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 12px; color: var(--orange);
+  cursor: pointer;
+}
+.template-dl:hover { text-decoration: underline; }
+
+.csv-preview {
+  margin-top: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.csv-preview-head {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px; color: var(--muted);
+  display: flex; justify-content: space-between;
+}
+.csv-rows { overflow-x: auto; }
+.csv-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.csv-table th { background: var(--card); padding: 8px 12px; font-weight: 700; color: var(--muted); font-size: 11px; white-space: nowrap; }
+.csv-table td { padding: 8px 12px; border-top: 1px solid var(--border); white-space: nowrap; }
+.csv-table tr.error td { background: rgba(255,59,59,0.08); }
+.csv-table tr.ok td:first-child { border-left: 2px solid var(--success); }
+.csv-table tr.error td:first-child { border-left: 2px solid var(--danger); }
+.row-status { font-size: 11px; padding: 2px 6px; border-radius: 4px; }
+.row-status.ok { background: rgba(0,200,83,0.15); color: var(--success); }
+.row-status.error { background: rgba(255,59,59,0.15); color: var(--danger); }
+
+.json-area { font-size: 12px; font-family: 'Courier New', monospace; min-height: 220px; line-height: 1.6; }
+
+/* Import summary */
+.import-summary {
+  display: flex; gap: 12px; margin-bottom: 16px;
+}
+.summary-box {
+  flex: 1; background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+}
+.summary-num { font-size: 22px; font-weight: 900; }
+.summary-num.ok { color: var(--success); }
+.summary-num.err { color: var(--danger); }
+.summary-label { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 28px; right: 28px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 13px;
+  z-index: 999;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.3s;
+  display: flex; align-items: center; gap: 8px;
+  pointer-events: none;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { border-color: rgba(0,200,83,0.4); }
+.toast.error { border-color: rgba(255,59,59,0.4); }
+.toast-icon { font-size: 16px; }
+
+/* Inline edit highlight */
+.editing { outline: 2px solid var(--orange); border-radius: 4px; }
+
+/* Empty */
+.empty-row td { text-align: center; padding: 48px; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-row">
+      <div class="logo-icon">🚖</div>
+      <span class="logo-name">滴滴运营后台</span>
+    </div>
+    <div class="logo-ver">Coupon Management v1.0</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">核心功能</div>
+    <div class="nav-item active" onclick="showPage('coupons')">
+      <span class="nav-icon">🎫</span> 优惠券管理
+    </div>
+    <div class="nav-item" onclick="showPage('cities')">
+      <span class="nav-icon">🏙️</span> 城市管理
+    </div>
+    <div class="nav-group-label">数据</div>
+    <div class="nav-item" onclick="showPage('stats')">
+      <span class="nav-icon">📊</span> 数据概览
+    </div>
+    <div class="nav-item" onclick="showPage('export')">
+      <span class="nav-icon">📤</span> 导出数据
+    </div>
+    <div class="nav-group-label">设置</div>
+    <div class="nav-item" onclick="showPage('settings')">
+      <span class="nav-icon">⚙️</span> 系统设置
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    当前数据存储于本地<br>接入后端后可同步云端
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="pageTitle">🎫 优惠券管理</div>
+    <div class="topbar-right">
+      <div class="topbar-badge" id="syncBadge">● 数据已更新</div>
+      <div style="font-size:12px;color:var(--muted)" id="lastUpdate"></div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Stats -->
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card" data-icon="🎫">
+        <div class="stat-label">优惠券总数</div>
+        <div class="stat-val orange" id="s-total">0</div>
+        <div class="stat-sub">全部城市合计</div>
+      </div>
+      <div class="stat-card" data-icon="🏙️">
+        <div class="stat-label">覆盖城市</div>
+        <div class="stat-val" id="s-cities">0</div>
+        <div class="stat-sub">已配置优惠券</div>
+      </div>
+      <div class="stat-card" data-icon="🔥">
+        <div class="stat-label">紧张库存</div>
+        <div class="stat-val" style="color:#F59E0B" id="s-low">0</div>
+        <div class="stat-sub">剩余 < 50 张</div>
+      </div>
+      <div class="stat-card" data-icon="✅">
+        <div class="stat-label">有效券</div>
+        <div class="stat-val green" id="s-active">0</div>
+        <div class="stat-sub">未过期</div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <input class="search-box" placeholder="🔍 搜索优惠券名称、城市..." id="searchInput" oninput="filterTable()">
+      <select class="filter-select" id="cityFilter" onchange="filterTable()">
+        <option value="">全部城市</option>
+      </select>
+      <select class="filter-select" id="statusFilter" onchange="filterTable()">
+        <option value="">全部状态</option>
+        <option value="active">有效</option>
+        <option value="expired">已过期</option>
+        <option value="low">库存紧张</option>
+      </select>
+      <div class="btn-group">
+        <button class="btn btn-success" onclick="openImportModal()">⬆ 批量导入</button>
+        <button class="btn btn-secondary" onclick="exportCSV()">⬇ 导出 CSV</button>
+        <button class="btn btn-publish" onclick="publishJSON()" id="publishBtn">🚀 发布到前台</button>
+        <button class="btn btn-primary" onclick="openAddModal()">＋ 新增优惠券</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <div class="table-header">
+        <div class="table-header-title">优惠券列表</div>
+        <div class="table-count" id="tableCount"></div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="checkAll" onchange="toggleAll(this)"></th>
+            <th>城市</th>
+            <th>优惠券名称</th>
+            <th>金额</th>
+            <th>使用说明</th>
+            <th>库存 / 剩余</th>
+            <th>有效期</th>
+            <th>状态</th>
+            <th>领取链接</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="addModalTitle">新增优惠券</div>
+      <div class="modal-close" onclick="closeModal('addModal')">✕</div>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">城市 <span class="required">*</span></label>
+          <input class="form-input" id="f-city" placeholder="如：北京" list="cityList">
+          <datalist id="cityList"></datalist>
+        </div>
+        <div class="form-group">
+          <label class="form-label">优惠券名称 <span class="required">*</span></label>
+          <input class="form-input" id="f-name" placeholder="如：打车立减券">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">金额（元） <span class="required">*</span></label>
+          <input class="form-input" id="f-amount" type="number" placeholder="20">
+        </div>
+        <div class="form-group">
+          <label class="form-label">单位</label>
+          <input class="form-input" id="f-unit" placeholder="元" value="元">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">使用说明 <span class="required">*</span></label>
+        <textarea class="form-textarea" id="f-desc" placeholder="满50元可用&#10;快车/专车通用"></textarea>
+        <div class="form-hint">支持换行，在前台会按行展示</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">总库存</label>
+          <input class="form-input" id="f-total" type="number" placeholder="500">
+        </div>
+        <div class="form-group">
+          <label class="form-label">剩余数量</label>
+          <input class="form-input" id="f-remain" type="number" placeholder="500">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">有效期至 <span class="required">*</span></label>
+        <input class="form-input" id="f-expire" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">领取链接 <span class="required">*</span></label>
+        <input class="form-input" id="f-link" type="url" placeholder="https://www.didiglobal.com/coupon/xxx">
+        <div class="form-hint">滴滴后台生成的优惠券领取链接</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('addModal')">取消</button>
+      <button class="btn btn-primary" onclick="saveCoupon()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import Modal -->
+<div class="overlay" id="importModal">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <div class="modal-title">⬆ 批量导入优惠券</div>
+      <div class="modal-close" onclick="closeModal('importModal')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="import-tabs">
+        <div class="import-tab active" onclick="switchImportTab('csv', this)">📄 CSV 文件上传</div>
+        <div class="import-tab" onclick="switchImportTab('json', this)">{ } JSON 粘贴</div>
+        <div class="import-tab" onclick="switchImportTab('manual', this)">✏️ 表格粘贴</div>
+      </div>
+
+      <!-- CSV Tab -->
+      <div id="tab-csv">
+        <div class="drop-zone" id="dropZone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+          <input type="file" class="drop-input" accept=".csv" onchange="handleFileSelect(event)">
+          <div class="drop-icon">📁</div>
+          <div class="drop-title">拖拽 CSV 文件到此处</div>
+          <div class="drop-sub">或点击选择文件上传 · 支持 .csv 格式</div>
+        </div>
+        <div class="template-dl" onclick="downloadTemplate()">⬇ 下载导入模板（CSV）</div>
+        <div id="csvPreview"></div>
+      </div>
+
+      <!-- JSON Tab -->
+      <div id="tab-json" style="display:none">
+        <div class="form-group">
+          <label class="form-label">粘贴 JSON 数据</label>
+          <textarea class="form-textarea json-area" id="jsonInput" placeholder='[
+  {
+    "city": "北京",
+    "name": "打车立减券",
+    "amount": 20,
+    "unit": "元",
+    "desc": "满50元可用\n快车专车通用",
+    "total": 500,
+    "remain": 500,
+    "expire": "2025-03-31",
+    "link": "https://..."
+  }
+]'></textarea>
+        </div>
+        <button class="btn btn-secondary" onclick="parseJSON()" style="width:100%">解析 JSON</button>
+        <div id="jsonPreview"></div>
+      </div>
+
+      <!-- Manual Tab -->
+      <div id="tab-manual" style="display:none">
+        <div class="form-group">
+          <label class="form-label">从 Excel 复制粘贴数据</label>
+          <div class="form-hint" style="margin-bottom:8px">请确保列顺序为：城市、名称、金额、单位、说明、总库存、剩余、有效期至、链接</div>
+          <textarea class="form-textarea json-area" id="manualInput" placeholder="北京	打车立减券	20	元	满50元可用	500	500	2025-03-31	https://...
+上海	新人专享券	30	元	满60元可用	300	300	2025-03-31	https://..."></textarea>
+        </div>
+        <button class="btn btn-secondary" onclick="parseManual()" style="width:100%">解析数据</button>
+        <div id="manualPreview"></div>
+      </div>
+
+      <!-- Summary (shown after parse) -->
+      <div id="importSummary" style="display:none; margin-top:16px">
+        <div class="import-summary">
+          <div class="summary-box">
+            <div class="summary-num ok" id="sumOk">0</div>
+            <div class="summary-label">可导入</div>
+          </div>
+          <div class="summary-box">
+            <div class="summary-num err" id="sumErr">0</div>
+            <div class="summary-label">错误行</div>
+          </div>
+          <div class="summary-box">
+            <div class="summary-num" id="sumTotal">0</div>
+            <div class="summary-label">总行数</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('importModal')">取消</button>
+      <button class="btn btn-primary" id="importConfirmBtn" onclick="confirmImport()" disabled>确认导入</button>
+    </div>
+  </div>
+</div>
+
+<!-- Publish Modal -->
+<div class="overlay" id="publishModal">
+  <div class="modal" style="width:520px">
+    <div class="modal-head">
+      <div class="modal-title">🚀 发布数据到前台</div>
+      <div class="modal-close" onclick="closeModal('publishModal')">✕</div>
+    </div>
+    <div class="modal-body">
+      <!-- Step indicator -->
+      <div style="display:flex;gap:0;margin-bottom:24px;border-radius:12px;overflow:hidden;border:1px solid var(--border)">
+        <div style="flex:1;padding:12px;text-align:center;background:var(--orange-dim);border-right:1px solid var(--border)">
+          <div style="font-size:18px;margin-bottom:4px">1️⃣</div>
+          <div style="font-size:12px;font-weight:700;color:var(--orange)">下载文件</div>
+        </div>
+        <div style="flex:1;padding:12px;text-align:center;border-right:1px solid var(--border)">
+          <div style="font-size:18px;margin-bottom:4px">2️⃣</div>
+          <div style="font-size:12px;font-weight:700;color:var(--muted)">上传替换</div>
+        </div>
+        <div style="flex:1;padding:12px;text-align:center">
+          <div style="font-size:18px;margin-bottom:4px">3️⃣</div>
+          <div style="font-size:12px;font-weight:700;color:var(--muted)">完成生效</div>
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div style="background:var(--surface);border-radius:14px;padding:18px;margin-bottom:12px;border:1px solid var(--border)">
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px">第一步：下载 data.json</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.7">
+          点击下方按钮，将当前 <strong style="color:var(--text)" id="pub-count">0</strong> 条优惠券数据导出为 <code style="background:var(--card);padding:2px 6px;border-radius:4px;color:var(--orange)">data.json</code> 文件，保存到你的电脑。
+        </div>
+        <button class="btn btn-publish" style="width:100%;justify-content:center" onclick="downloadJSON()">
+          ⬇ 下载 data.json（<span id="pub-count2">0</span> 条数据）
+        </button>
+      </div>
+
+      <!-- Step 2 -->
+      <div style="background:var(--surface);border-radius:14px;padding:18px;margin-bottom:12px;border:1px solid var(--border)">
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px">第二步：上传到你的托管平台</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.8">
+          将下载的 <code style="background:var(--card);padding:2px 6px;border-radius:4px;color:var(--orange)">data.json</code> 上传到你的网站根目录，与 <code style="background:var(--card);padding:2px 6px;border-radius:4px">index.html</code> 放在<strong style="color:var(--text)">同一个文件夹</strong>。
+          <br><br>
+          <strong style="color:var(--text)">常用平台操作：</strong><br>
+          · GitHub Pages → 进入仓库，上传 data.json 提交<br>
+          · 阿里云 OSS → 进入 Bucket，上传并覆盖同名文件<br>
+          · 腾讯云 COS → 进入存储桶，上传覆盖<br>
+          · Vercel → 把 data.json 放进项目文件夹重新部署
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div style="background:var(--surface);border-radius:14px;padding:18px;border:1px solid var(--border)">
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px">第三步：验证生效</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.7">
+          刷新前台页面，数据即时生效。如果看不到更新，按 <strong style="color:var(--text)">Ctrl+Shift+R</strong>（Mac 用 Cmd+Shift+R）强制刷新清除缓存。
+        </div>
+      </div>
+
+      <!-- File structure hint -->
+      <div style="margin-top:16px;background:var(--card);border:1px dashed var(--border-strong);border-radius:12px;padding:14px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:700;letter-spacing:0.05em">📁 正确的文件结构</div>
+        <pre style="font-size:12px;color:var(--text);line-height:1.9;font-family:monospace">你的网站根目录/
+├── <span style="color:var(--orange)">data.json</span>      ← 每次发布后更新这个
+├── index.html     ← 前台页面（用户看到的）
+└── admin.html     ← 后台管理（你用的）</pre>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('publishModal')">关闭</button>
+      <button class="btn btn-publish" onclick="downloadJSON()">⬇ 立即下载 data.json</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toastIcon"></span>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+// =====================
+// Data Store
+// =====================
+const STORE_KEY = 'didi_coupons_v2';
+let allCoupons = [];
+let pendingImport = [];
+let editingId = null;
+let currentPage = 1;
+const PAGE_SIZE = 10;
+
+function load() {
+  const raw = localStorage.getItem(STORE_KEY);
+  if (raw) {
+    try { allCoupons = JSON.parse(raw); } catch(e) { allCoupons = []; }
+  } else {
+    // 默认示例数据
+    allCoupons = [
+      { id: uid(), city: '北京', name: '打车立减券', amount: 20, unit: '元', desc: '满50元可用\n快车/专车通用', total: 500, remain: 127, expire: '2025-03-31', link: 'https://www.didiglobal.com/coupon/bj001' },
+      { id: uid(), city: '北京', name: '专车优惠包', amount: 50, unit: '元', desc: '5张×10元，满80元可用\n有效期30天', total: 200, remain: 43, expire: '2025-03-31', link: 'https://www.didiglobal.com/coupon/bj002' },
+      { id: uid(), city: '上海', name: '新人专享券', amount: 30, unit: '元', desc: '满60元可用，限新用户', total: 300, remain: 89, expire: '2025-03-15', link: 'https://www.didiglobal.com/coupon/sh001' },
+      { id: uid(), city: '深圳', name: '通勤专享券', amount: 10, unit: '元', desc: '工作日早晚高峰可用', total: 800, remain: 201, expire: '2025-03-31', link: 'https://www.didiglobal.com/coupon/sz001' },
+      { id: uid(), city: '深圳', name: '豪华车型礼包', amount: 80, unit: '元', desc: '4张×20元，豪华车型专用', total: 100, remain: 18, expire: '2025-04-30', link: 'https://www.didiglobal.com/coupon/sz002' },
+      { id: uid(), city: '广州', name: '周末出行券', amount: 15, unit: '元', desc: '周六日使用，满40元可用', total: 1000, remain: 312, expire: '2025-03-31', link: 'https://www.didiglobal.com/coupon/gz001' },
+      { id: uid(), city: '成都', name: '美食出行券', amount: 12, unit: '元', desc: '满35元可用，每日限1张', total: 2000, remain: 876, expire: '2025-03-31', link: 'https://www.didiglobal.com/coupon/cd001' },
+    ];
+    save();
+  }
+}
+
+function save() {
+  localStorage.setItem(STORE_KEY, JSON.stringify(allCoupons));
+  document.getElementById('lastUpdate').textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
+  refreshStats();
+  refreshCityFilter();
+  refreshCityDatalist();
+}
+
+function uid() { return 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
+
+// =====================
+// Stats
+// =====================
+function refreshStats() {
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('s-total').textContent = allCoupons.length;
+  const cities = new Set(allCoupons.map(c => c.city));
+  document.getElementById('s-cities').textContent = cities.size;
+  document.getElementById('s-low').textContent = allCoupons.filter(c => c.remain < 50).length;
+  document.getElementById('s-active').textContent = allCoupons.filter(c => c.expire >= today).length;
+}
+
+// =====================
+// Table Render
+// =====================
+let filteredData = [];
+
+function filterTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const city = document.getElementById('cityFilter').value;
+  const status = document.getElementById('statusFilter').value;
+  const today = new Date().toISOString().slice(0,10);
+
+  filteredData = allCoupons.filter(c => {
+    const matchQ = !q || c.name.toLowerCase().includes(q) || c.city.includes(q);
+    const matchCity = !city || c.city === city;
+    let matchStatus = true;
+    if (status === 'active') matchStatus = c.expire >= today;
+    if (status === 'expired') matchStatus = c.expire < today;
+    if (status === 'low') matchStatus = c.remain < 50;
+    return matchQ && matchCity && matchStatus;
+  });
+
+  currentPage = 1;
+  renderTable();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  const total = filteredData.length;
+  document.getElementById('tableCount').textContent = `共 ${total} 条`;
+
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const page = filteredData.slice(start, start + PAGE_SIZE);
+  const today = new Date().toISOString().slice(0,10);
+
+  if (page.length === 0) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="10">暂无数据，点击「新增优惠券」或「批量导入」添加</td></tr>`;
+  } else {
+    tbody.innerHTML = page.map(c => {
+      const claimedPct = c.total > 0 ? Math.round((c.total - c.remain) / c.total * 100) : 0;
+      const isExpired = c.expire < today;
+      const isLow = c.remain < 50;
+      const statusDot = isExpired
+        ? `<span class="status-dot"><span class="dot dot-red"></span>已过期</span>`
+        : isLow
+          ? `<span class="status-dot"><span class="dot dot-yellow"></span>库存紧张</span>`
+          : `<span class="status-dot"><span class="dot dot-green"></span>有效</span>`;
+      const fillClass = claimedPct > 80 ? 'high' : claimedPct > 50 ? 'mid' : 'low';
+      return `<tr>
+        <td><input type="checkbox" data-id="${c.id}" class="row-check"></td>
+        <td><span class="city-tag">${c.city}</span></td>
+        <td style="font-weight:600">${c.name}</td>
+        <td><span class="amount-badge">¥${c.amount}</span> <span style="font-size:11px;color:var(--muted)">${c.unit}</span></td>
+        <td style="color:var(--muted);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${c.desc}">${c.desc.replace(/\n/g,' · ')}</td>
+        <td>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar"><div class="progress-fill ${fillClass}" style="width:${claimedPct}%"></div></div>
+            <span class="progress-text">${c.remain}/${c.total}</span>
+          </div>
+        </td>
+        <td style="white-space:nowrap">${c.expire}</td>
+        <td>${statusDot}</td>
+        <td><a href="${c.link}" target="_blank" class="link-cell" title="${c.link}">${c.link}</a></td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-secondary btn-sm" onclick='editCoupon(${JSON.stringify(c)})'>编辑</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteCoupon('${c.id}')" style="margin-left:4px">删除</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Pagination
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const pg = document.getElementById('pagination');
+  if (totalPages <= 1) { pg.innerHTML = `<span>共 ${total} 条</span>`; return; }
+  let pages = '';
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === currentPage || i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
+      pages += `<div class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</div>`;
+    } else if (Math.abs(i - currentPage) === 2) {
+      pages += `<div class="page-btn" style="cursor:default;opacity:0.4">…</div>`;
+    }
+  }
+  pg.innerHTML = `<span>共 ${total} 条</span><div class="page-btns">${pages}</div><span>第 ${currentPage}/${totalPages} 页</span>`;
+}
+
+function goPage(p) { currentPage = p; renderTable(); }
+
+function toggleAll(cb) {
+  document.querySelectorAll('.row-check').forEach(c => c.checked = cb.checked);
+}
+
+// =====================
+// CRUD
+// =====================
+function openAddModal() {
+  editingId = null;
+  document.getElementById('addModalTitle').textContent = '新增优惠券';
+  ['city','name','amount','unit','desc','total','remain','expire','link'].forEach(f => {
+    document.getElementById('f-'+f).value = f === 'unit' ? '元' : '';
+  });
+  document.getElementById('addModal').classList.add('show');
+}
+
+function editCoupon(c) {
+  editingId = c.id;
+  document.getElementById('addModalTitle').textContent = '编辑优惠券';
+  document.getElementById('f-city').value = c.city;
+  document.getElementById('f-name').value = c.name;
+  document.getElementById('f-amount').value = c.amount;
+  document.getElementById('f-unit').value = c.unit;
+  document.getElementById('f-desc').value = c.desc;
+  document.getElementById('f-total').value = c.total;
+  document.getElementById('f-remain').value = c.remain;
+  document.getElementById('f-expire').value = c.expire;
+  document.getElementById('f-link').value = c.link;
+  document.getElementById('addModal').classList.add('show');
+}
+
+function saveCoupon() {
+  const city = document.getElementById('f-city').value.trim();
+  const name = document.getElementById('f-name').value.trim();
+  const amount = parseFloat(document.getElementById('f-amount').value);
+  const link = document.getElementById('f-link').value.trim();
+  const expire = document.getElementById('f-expire').value;
+
+  if (!city || !name || isNaN(amount) || !link || !expire) {
+    showToast('请填写所有必填项', 'error'); return;
+  }
+
+  const coupon = {
+    id: editingId || uid(),
+    city,
+    name,
+    amount,
+    unit: document.getElementById('f-unit').value || '元',
+    desc: document.getElementById('f-desc').value,
+    total: parseInt(document.getElementById('f-total').value) || 0,
+    remain: parseInt(document.getElementById('f-remain').value) || 0,
+    expire,
+    link
+  };
+
+  if (editingId) {
+    const idx = allCoupons.findIndex(c => c.id === editingId);
+    if (idx >= 0) allCoupons[idx] = coupon;
+    showToast('✓ 优惠券已更新', 'success');
+  } else {
+    allCoupons.unshift(coupon);
+    showToast('✓ 优惠券已添加', 'success');
+  }
+
+  save(); filterTable();
+  closeModal('addModal');
+}
+
+function deleteCoupon(id) {
+  const checked = [...document.querySelectorAll('.row-check:checked')].map(c => c.dataset.id);
+  const idsToDelete = checked.length > 0 ? checked : [id];
+  if (!confirm(`确认删除 ${idsToDelete.length} 条优惠券？此操作不可撤销。`)) return;
+  allCoupons = allCoupons.filter(c => !idsToDelete.includes(c.id));
+  save(); filterTable();
+  showToast(`✓ 已删除 ${idsToDelete.length} 条`, 'success');
+}
+
+// =====================
+// Import
+// =====================
+let currentImportTab = 'csv';
+
+function openImportModal() {
+  pendingImport = [];
+  document.getElementById('csvPreview').innerHTML = '';
+  document.getElementById('jsonPreview').innerHTML = '';
+  document.getElementById('manualPreview').innerHTML = '';
+  document.getElementById('importSummary').style.display = 'none';
+  document.getElementById('importConfirmBtn').disabled = true;
+  document.getElementById('importModal').classList.add('show');
+}
+
+function switchImportTab(tab, el) {
+  currentImportTab = tab;
+  document.querySelectorAll('.import-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['csv','json','manual'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t === tab ? '' : 'none';
+  });
+  pendingImport = [];
+  document.getElementById('importSummary').style.display = 'none';
+  document.getElementById('importConfirmBtn').disabled = true;
+}
+
+function handleDragOver(e) { e.preventDefault(); document.getElementById('dropZone').classList.add('dragover'); }
+function handleDragLeave(e) { document.getElementById('dropZone').classList.remove('dragover'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) parseCSVFile(file);
+}
+function handleFileSelect(e) { if (e.target.files[0]) parseCSVFile(e.target.files[0]); }
+
+function parseCSVFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => parseCSVText(e.target.result);
+  reader.readAsText(file, 'UTF-8');
+}
+
+function parseCSVText(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,''));
+  const rows = lines.slice(1);
+  const result = [];
+
+  rows.forEach((line, i) => {
+    if (!line.trim()) return;
+    const vals = parseCSVLine(line);
+    const obj = {};
+    headers.forEach((h, idx) => { obj[h] = (vals[idx] || '').trim(); });
+
+    // Map headers (flexible)
+    const c = mapRow(obj, vals, headers);
+    result.push({ ...c, _line: i + 2, _raw: line });
+  });
+
+  showPreview(result, 'csvPreview');
+}
+
+function parseCSVLine(line) {
+  const result = []; let cur = ''; let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    if (line[i] === '"') { inQ = !inQ; }
+    else if (line[i] === ',' && !inQ) { result.push(cur); cur = ''; }
+    else { cur += line[i]; }
+  }
+  result.push(cur);
+  return result;
+}
+
+function mapRow(obj, vals, headers) {
+  // Support both Chinese & English headers
+  const get = (...keys) => {
+    for (const k of keys) {
+      if (obj[k] !== undefined && obj[k] !== '') return obj[k];
+    }
+    return '';
+  };
+  return {
+    city: get('城市', 'city'),
+    name: get('名称', '优惠券名称', 'name'),
+    amount: parseFloat(get('金额', 'amount')) || 0,
+    unit: get('单位', 'unit') || '元',
+    desc: get('说明', '使用说明', 'desc', 'description').replace(/\\n/g, '\n'),
+    total: parseInt(get('总库存', 'total')) || 0,
+    remain: parseInt(get('剩余', '剩余数量', 'remain')) || 0,
+    expire: get('有效期', '有效期至', 'expire'),
+    link: get('链接', '领取链接', 'link')
+  };
+}
+
+function validateRow(c) {
+  const errors = [];
+  if (!c.city) errors.push('缺少城市');
+  if (!c.name) errors.push('缺少名称');
+  if (!c.amount || c.amount <= 0) errors.push('金额无效');
+  if (!c.link || !c.link.startsWith('http')) errors.push('链接无效');
+  if (!c.expire || !/^\d{4}-\d{2}-\d{2}$/.test(c.expire)) errors.push('日期格式错误');
+  return errors;
+}
+
+function showPreview(rows, containerId) {
+  const valid = [], invalid = [];
+  rows.forEach(r => {
+    const errs = validateRow(r);
+    if (errs.length === 0) valid.push(r); else invalid.push({ ...r, _errors: errs });
+  });
+
+  pendingImport = valid;
+  const all = [...valid, ...invalid];
+
+  document.getElementById('sumOk').textContent = valid.length;
+  document.getElementById('sumErr').textContent = invalid.length;
+  document.getElementById('sumTotal').textContent = all.length;
+  document.getElementById('importSummary').style.display = '';
+  document.getElementById('importConfirmBtn').disabled = valid.length === 0;
+
+  const html = `<div class="csv-preview">
+    <div class="csv-preview-head">
+      <span>预览数据（前20行）</span>
+      <span>✅ ${valid.length} 条有效 / ❌ ${invalid.length} 条错误</span>
+    </div>
+    <div class="csv-rows">
+      <table class="csv-table">
+        <thead><tr><th>#</th><th>城市</th><th>名称</th><th>金额</th><th>有效期</th><th>剩余/总量</th><th>状态</th></tr></thead>
+        <tbody>
+          ${all.slice(0,20).map((r, i) => {
+            const errs = r._errors || [];
+            const ok = errs.length === 0;
+            return `<tr class="${ok?'ok':'error'}">
+              <td>${r._line || i+2}</td>
+              <td>${r.city || '<i style="color:var(--muted)">空</i>'}</td>
+              <td>${r.name || '<i style="color:var(--muted)">空</i>'}</td>
+              <td>${r.amount ? '¥'+r.amount : '-'}</td>
+              <td>${r.expire || '-'}</td>
+              <td>${r.remain}/${r.total}</td>
+              <td><span class="row-status ${ok?'ok':'error'}">${ok ? '✓ 有效' : '✗ ' + errs.join(', ')}</span></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+
+  document.getElementById(containerId).innerHTML = html;
+}
+
+function parseJSON() {
+  try {
+    const raw = JSON.parse(document.getElementById('jsonInput').value);
+    const rows = Array.isArray(raw) ? raw : [raw];
+    const mapped = rows.map((r, i) => ({ ...mapRow(r, [], Object.keys(r)), _line: i+1 }));
+    showPreview(mapped, 'jsonPreview');
+  } catch(e) {
+    showToast('JSON 格式错误：' + e.message, 'error');
+  }
+}
+
+function parseManual() {
+  const lines = document.getElementById('manualInput').value.trim().split('\n');
+  const cols = ['city','name','amount','unit','desc','total','remain','expire','link'];
+  const rows = lines.map((line, i) => {
+    const vals = line.split('\t');
+    const obj = {};
+    cols.forEach((k, idx) => { obj[k] = (vals[idx] || '').trim(); });
+    obj.amount = parseFloat(obj.amount) || 0;
+    obj.total = parseInt(obj.total) || 0;
+    obj.remain = parseInt(obj.remain) || 0;
+    return { ...obj, _line: i+1 };
+  });
+  showPreview(rows, 'manualPreview');
+}
+
+function confirmImport() {
+  if (pendingImport.length === 0) return;
+  const withIds = pendingImport.map(c => ({ ...c, id: uid() }));
+  allCoupons.unshift(...withIds);
+  save(); filterTable();
+  closeModal('importModal');
+  showToast(`✓ 成功导入 ${withIds.length} 条优惠券`, 'success');
+}
+
+// =====================
+// Export
+// =====================
+function exportCSV() {
+  const headers = ['城市','名称','金额','单位','说明','总库存','剩余','有效期至','链接'];
+  const rows = (filteredData.length > 0 ? filteredData : allCoupons).map(c =>
+    [c.city, c.name, c.amount, c.unit, '"' + c.desc.replace(/"/g,'""') + '"', c.total, c.remain, c.expire, c.link].join(',')
+  );
+  const csv = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = `didi_coupons_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('✓ CSV 已下载', 'success');
+}
+
+function downloadTemplate() {
+  const csv = '\uFEFF城市,名称,金额,单位,说明,总库存,剩余,有效期至,链接\n北京,打车立减券,20,元,满50元可用,500,500,2025-03-31,https://www.didiglobal.com/coupon/xxx\n上海,新人专享券,30,元,满60元可用\\n限新用户,300,300,2025-03-31,https://www.didiglobal.com/coupon/xxx';
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = 'didi_coupon_template.csv';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('✓ 模板已下载', 'success');
+}
+
+// =====================
+// Helpers
+// =====================
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+  document.getElementById('toastIcon').textContent = icon;
+  document.getElementById('toastMsg').textContent = msg;
+  t.className = 'toast show ' + (type || '');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function refreshCityFilter() {
+  const sel = document.getElementById('cityFilter');
+  const cur = sel.value;
+  const cities = [...new Set(allCoupons.map(c => c.city))].sort();
+  sel.innerHTML = '<option value="">全部城市</option>' + cities.map(c => `<option value="${c}">${c}</option>`).join('');
+  sel.value = cur;
+}
+
+function refreshCityDatalist() {
+  const dl = document.getElementById('cityList');
+  const cities = [...new Set(allCoupons.map(c => c.city))];
+  dl.innerHTML = cities.map(c => `<option value="${c}">`).join('');
+}
+
+function showPage(p) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  const titles = { coupons:'🎫 优惠券管理', cities:'🏙️ 城市管理', stats:'📊 数据概览', export:'📤 导出数据', settings:'⚙️ 系统设置' };
+  document.getElementById('pageTitle').textContent = titles[p] || '';
+  if (p !== 'coupons') showToast('该模块正在开发中，敬请期待', '');
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) closeModal(o.id); });
+});
+
+// =====================
+// Publish
+// =====================
+function publishJSON() {
+  document.getElementById('pub-count').textContent = allCoupons.length;
+  document.getElementById('pub-count2').textContent = allCoupons.length;
+  document.getElementById('publishModal').classList.add('show');
+}
+
+function downloadJSON() {
+  const data = allCoupons.map(({ id, city, name, amount, unit, desc, total, remain, expire, link }) =>
+    ({ id, city, name, amount, unit, desc, total, remain, expire, link })
+  );
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = 'data.json';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('✓ data.json 已下载，请上传到网站根目录', 'success');
+}
+
+// =====================
+// Init
+// =====================
+load();
+filteredData = [...allCoupons];
+refreshCityFilter();
+refreshCityDatalist();
+renderTable();
+refreshStats();
+document.getElementById('lastUpdate').textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
+</script>
+</body>
+</html>

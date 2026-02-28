@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>部署指南 · 滴滴优惠券系统</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --orange: #FF6B00; --orange-dim: rgba(255,107,0,0.12); --orange-glow: rgba(255,107,0,0.25);
+  --purple: #7C3AED; --purple-dim: rgba(124,58,237,0.12);
+  --dark: #0A0A0A; --card: #161616; --surface: #1C1C1C;
+  --border: rgba(255,255,255,0.07); --text: #F0F0F0; --muted: #666; --success: #00C853;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans SC',sans-serif; background:var(--dark); color:var(--text); padding: 40px 20px; }
+.wrap { max-width: 760px; margin: 0 auto; }
+
+/* Header */
+.header { text-align:center; margin-bottom: 48px; }
+.header h1 { font-size: 32px; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 10px; }
+.header h1 span { color: var(--orange); }
+.header p { color: var(--muted); font-size: 14px; line-height: 1.7; }
+
+/* File structure */
+.file-tree {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 24px; margin-bottom: 40px;
+}
+.file-tree-title { font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 16px; letter-spacing: 0.06em; text-transform: uppercase; }
+.tree { font-family: monospace; font-size: 14px; line-height: 2.2; }
+.tree .folder { color: var(--muted); }
+.tree .file-orange { color: var(--orange); font-weight: 700; }
+.tree .file-gray { color: #888; }
+.tree .comment { color: var(--muted); font-size: 12px; margin-left: 16px; font-family: 'Noto Sans SC', sans-serif; }
+
+/* Step card */
+.step-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 28px; margin-bottom: 20px;
+  position: relative; overflow: hidden;
+}
+.step-card::before {
+  content: attr(data-num);
+  position: absolute; right: 24px; top: 20px;
+  font-size: 72px; font-weight: 900; opacity: 0.04;
+  line-height: 1; pointer-events: none;
+}
+.step-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 8px;
+  background: var(--orange-dim); color: var(--orange);
+  font-size: 13px; font-weight: 900; margin-bottom: 12px;
+}
+.step-title { font-size: 17px; font-weight: 800; margin-bottom: 8px; }
+.step-desc { font-size: 13px; color: var(--muted); line-height: 1.8; margin-bottom: 16px; }
+.step-img {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px; margin-bottom: 12px;
+  font-size: 13px; line-height: 1.9;
+}
+.step-img code {
+  background: var(--card); padding: 2px 7px; border-radius: 5px;
+  color: var(--orange); font-size: 12px; font-family: monospace;
+}
+.step-img strong { color: var(--text); }
+.tip {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: var(--orange-dim); border: 1px solid rgba(255,107,0,0.2);
+  border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #FFB27A; line-height: 1.7;
+}
+.tip-icon { flex-shrink: 0; font-size: 16px; }
+.tip.purple { background: var(--purple-dim); border-color: rgba(124,58,237,0.2); color: #C4B5FD; }
+.tip.green { background: rgba(0,200,83,0.1); border-color: rgba(0,200,83,0.2); color: #6EE7A0; }
+
+/* Platform tabs */
+.platforms { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 16px; }
+.platform-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px; text-align: center; cursor: pointer;
+  transition: all 0.15s;
+}
+.platform-card:hover { border-color: rgba(255,255,255,0.15); }
+.platform-card.active { background: var(--orange-dim); border-color: rgba(255,107,0,0.3); }
+.platform-icon { font-size: 28px; margin-bottom: 6px; }
+.platform-name { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+.platform-tag { font-size: 10px; color: var(--muted); }
+.platform-tag.free { color: var(--success); }
+
+.platform-steps { display: none; }
+.platform-steps.show { display: block; }
+.platform-step {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.platform-step:last-child { border-bottom: none; }
+.ps-num {
+  width: 22px; height: 22px; border-radius: 6px;
+  background: var(--surface); display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
+  border: 1px solid var(--border);
+}
+.ps-content { font-size: 13px; line-height: 1.7; color: var(--muted); }
+.ps-content strong { color: var(--text); }
+
+/* Flow diagram */
+.flow {
+  display: flex; align-items: center; gap: 0; margin: 20px 0;
+  background: var(--surface); border-radius: 14px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.flow-item { flex: 1; padding: 14px 10px; text-align: center; font-size: 12px; line-height: 1.6; }
+.flow-item .fi-icon { font-size: 22px; margin-bottom: 4px; }
+.flow-item .fi-label { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+.flow-item .fi-sub { color: var(--muted); font-size: 11px; }
+.flow-item.highlight { background: var(--orange-dim); }
+.flow-arrow { color: var(--muted); font-size: 18px; flex-shrink: 0; }
+
+/* FAQ */
+.faq { margin-top: 40px; }
+.faq-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; }
+.faq-item { border: 1px solid var(--border); border-radius: 14px; margin-bottom: 10px; overflow: hidden; }
+.faq-q {
+  padding: 16px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center;
+  transition: background 0.15s;
+}
+.faq-q:hover { background: var(--surface); }
+.faq-a { padding: 0 20px; max-height: 0; overflow: hidden; transition: all 0.3s; font-size: 13px; color: var(--muted); line-height: 1.8; }
+.faq-a.open { max-height: 200px; padding: 0 20px 16px; }
+.faq-chevron { transition: transform 0.3s; }
+.faq-chevron.open { transform: rotate(180deg); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div style="font-size:48px;margin-bottom:16px">🚀</div>
+    <h1>滴滴优惠券系统<br><span>部署指南</span></h1>
+    <p>完全不需要写代码 · 三个文件搞定 · 10分钟上线</p>
+  </div>
+
+  <!-- File structure -->
+  <div class="file-tree">
+    <div class="file-tree-title">📁 你需要上传的文件（共4个）</div>
+    <div class="tree">
+      <div><span class="folder">你的网站/</span></div>
+      <div>&nbsp;&nbsp;├── <span class="file-orange">data.json</span> <span class="comment">← 🔑 数据文件，每次发布后更新这个</span></div>
+      <div>&nbsp;&nbsp;├── <span class="file-gray">index.html</span> <span class="comment">← 用户看到的前台页面</span></div>
+      <div>&nbsp;&nbsp;├── <span class="file-gray">admin.html</span> <span class="comment">← 你管理优惠券用的后台</span></div>
+      <div>&nbsp;&nbsp;└── <span class="file-gray">guide.html</span> <span class="comment">← 本页面（可选）</span></div>
+    </div>
+  </div>
+
+  <!-- Flow -->
+  <div style="margin-bottom:40px">
+    <div style="font-size:14px;font-weight:700;margin-bottom:14px">📋 工作流程</div>
+    <div class="flow">
+      <div class="flow-item">
+        <div class="fi-icon">⚙️</div>
+        <div class="fi-label">打开后台</div>
+        <div class="fi-sub">admin.html</div>
+      </div>
+      <div class="flow-arrow">›</div>
+      <div class="flow-item highlight">
+        <div class="fi-icon">🚀</div>
+        <div class="fi-label">点击发布</div>
+        <div class="fi-sub">下载 data.json</div>
+      </div>
+      <div class="flow-arrow">›</div>
+      <div class="flow-item">
+        <div class="fi-icon">☁️</div>
+        <div class="fi-label">上传覆盖</div>
+        <div class="fi-sub">替换旧文件</div>
+      </div>
+      <div class="flow-arrow">›</div>
+      <div class="flow-item">
+        <div class="fi-icon">✅</div>
+        <div class="fi-label">立即生效</div>
+        <div class="fi-sub">前台自动更新</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 1: First upload -->
+  <div class="step-card" data-num="1">
+    <div class="step-num">1</div>
+    <div class="step-title">第一次：上传所有文件</div>
+    <div class="step-desc">选择一个托管平台，把4个文件都上传上去。下面是各平台的操作步骤：</div>
+
+    <div class="platforms">
+      <div class="platform-card active" onclick="showPlatform('github', this)">
+        <div class="platform-icon">🐙</div>
+        <div class="platform-name">GitHub Pages</div>
+        <div class="platform-tag free">完全免费</div>
+      </div>
+      <div class="platform-card" onclick="showPlatform('oss', this)">
+        <div class="platform-icon">☁️</div>
+        <div class="platform-name">阿里云 OSS</div>
+        <div class="platform-tag">按量付费</div>
+      </div>
+      <div class="platform-card" onclick="showPlatform('vercel', this)">
+        <div class="platform-icon">▲</div>
+        <div class="platform-name">Vercel</div>
+        <div class="platform-tag free">免费套餐</div>
+      </div>
+    </div>
+
+    <!-- GitHub Steps -->
+    <div class="platform-steps show step-github" id="ps-github" style="background:var(--surface);border-radius:12px;padding:16px">
+      <div class="platform-step"><div class="ps-num">1</div><div class="ps-content">打开 <strong>github.com</strong>，注册账号并登录</div></div>
+      <div class="platform-step"><div class="ps-num">2</div><div class="ps-content">点右上角 <strong>+</strong> → <strong>New repository</strong>，仓库名随意，勾选 <strong>Add a README file</strong>，点 Create</div></div>
+      <div class="platform-step"><div class="ps-num">3</div><div class="ps-content">进入仓库，点 <strong>Add file</strong> → <strong>Upload files</strong>，把4个文件全部拖进去，点 <strong>Commit changes</strong></div></div>
+      <div class="platform-step"><div class="ps-num">4</div><div class="ps-content">点 <strong>Settings</strong> → 左侧 <strong>Pages</strong> → Source 选 <strong>Deploy from a branch</strong>，Branch 选 <strong>main</strong>，点 Save</div></div>
+      <div class="platform-step"><div class="ps-num">5</div><div class="ps-content">等约1分钟，页面顶部会出现你的网址，如 <strong style="color:var(--orange)">https://你的名字.github.io/仓库名/</strong></div></div>
+    </div>
+
+    <!-- OSS Steps -->
+    <div class="platform-steps step-oss" id="ps-oss" style="background:var(--surface);border-radius:12px;padding:16px">
+      <div class="platform-step"><div class="ps-num">1</div><div class="ps-content">登录 <strong>阿里云控制台</strong> → 搜索 <strong>对象存储 OSS</strong> → 创建 Bucket（地域随意，读写权限选<strong>公共读</strong>）</div></div>
+      <div class="platform-step"><div class="ps-num">2</div><div class="ps-content">进入 Bucket → <strong>文件列表</strong> → 上传4个文件</div></div>
+      <div class="platform-step"><div class="ps-num">3</div><div class="ps-content">点左侧 <strong>数据管理</strong> → <strong>静态页面</strong>，首页设置填 <strong>index.html</strong>，保存</div></div>
+      <div class="platform-step"><div class="ps-num">4</div><div class="ps-content">回到 Bucket 概览，复制 <strong>Endpoint（外网访问）</strong> 地址即可访问</div></div>
+    </div>
+
+    <!-- Vercel Steps -->
+    <div class="platform-steps step-vercel" id="ps-vercel" style="background:var(--surface);border-radius:12px;padding:16px">
+      <div class="platform-step"><div class="ps-num">1</div><div class="ps-content">把4个文件放到电脑的一个文件夹里</div></div>
+      <div class="platform-step"><div class="ps-num">2</div><div class="ps-content">打开 <strong>vercel.com</strong>，用 GitHub 账号登录</div></div>
+      <div class="platform-step"><div class="ps-num">3</div><div class="ps-content">点 <strong>Add New → Project</strong>，选择 <strong>Import Third-Party Git Repository</strong> 或直接把文件夹拖入（支持拖拽部署）</div></div>
+      <div class="platform-step"><div class="ps-num">4</div><div class="ps-content">部署完成后会得到一个 <strong style="color:var(--orange)">*.vercel.app</strong> 的网址</div></div>
+    </div>
+  </div>
+
+  <!-- Step 2: Daily workflow -->
+  <div class="step-card" data-num="2">
+    <div class="step-num">2</div>
+    <div class="step-title">日常更新：只需操作 data.json</div>
+    <div class="step-desc">第一次上传完成后，以后每次修改优惠券，只需重复这3步：</div>
+
+    <div class="step-img">
+      <strong>① 打开后台</strong>：浏览器访问你的网站地址 + <code>/admin.html</code><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;例如：<code>https://你的域名/admin.html</code>
+    </div>
+    <div class="step-img">
+      <strong>② 编辑并发布</strong>：在后台增删改优惠券，完成后点右上角 <code>🚀 发布到前台</code> 按钮，下载 <code>data.json</code>
+    </div>
+    <div class="step-img">
+      <strong>③ 上传覆盖</strong>：把新的 <code>data.json</code> 上传到网站，<strong>覆盖</strong>原来的同名文件即可
+    </div>
+
+    <div class="tip">
+      <span class="tip-icon">💡</span>
+      <span>上传后前台会立刻读取新数据。如果用户还看到旧数据，让他们按 <strong>Ctrl+F5</strong> 强制刷新即可。</span>
+    </div>
+  </div>
+
+  <!-- Step 3: Access control -->
+  <div class="step-card" data-num="3">
+    <div class="step-num">3</div>
+    <div class="step-title">保护后台（建议）</div>
+    <div class="step-desc">admin.html 默认是公开的，任何人知道地址都能访问。有两种简单的保护方式：</div>
+
+    <div class="step-img" style="margin-bottom:12px">
+      <strong>方法一（最简单）：不公开地址</strong><br>
+      把 admin.html 改个不容易猜到的名字，比如 <code>manage-x7k2.html</code>，只有你自己知道这个地址。
+    </div>
+    <div class="step-img">
+      <strong>方法二：Vercel/Netlify 密码保护</strong><br>
+      Vercel Pro 或 Netlify 支持对特定页面设置访问密码，在平台设置中配置即可。
+    </div>
+
+    <div class="tip purple">
+      <span class="tip-icon">🔐</span>
+      <span>如果后来需要更完整的权限控制，可以考虑升级到 Firebase 方案，我可以帮你改造。</span>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq">
+    <div class="faq-title">❓ 常见问题</div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        前台显示"演示模式"，data.json没生效？
+        <span class="faq-chevron">▼</span>
+      </div>
+      <div class="faq-a">确保 data.json 和 index.html 在同一个目录下。如果是本地直接双击打开 HTML 文件（file:// 协议），浏览器会阻止读取本地 JSON，需要上传到服务器后才能正常工作。</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        上传了 data.json 但前台还是旧数据？
+        <span class="faq-chevron">▼</span>
+      </div>
+      <div class="faq-a">浏览器缓存导致。按 Ctrl+Shift+R（Mac 用 Cmd+Shift+R）强制刷新。系统已在链接中加了时间戳参数防止缓存，但偶尔仍需手动刷新。</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        用户领取记录会不会丢失？
+        <span class="faq-chevron">▼</span>
+      </div>
+      <div class="faq-a">用户的已领取记录存储在他们自己设备的 localStorage 里，换设备或清除浏览器数据后会重置。这是纯静态方案的局限，如需跨设备同步需要接入后端。</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        后台的数据和前台不一致，怎么同步？
+        <span class="faq-chevron">▼</span>
+      </div>
+      <div class="faq-a">后台的数据存在你本地浏览器，每次修改完后必须点「发布到前台」按钮下载 data.json，再上传到服务器。前台永远以服务器上的 data.json 为准。</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        能不能多人同时管理后台？
+        <span class="faq-chevron">▼</span>
+      </div>
+      <div class="faq-a">目前不支持，因为数据存在各自的浏览器本地。如需多人协作管理，需要升级到数据库方案（Firebase / 自己的后端），可以告诉我，我来帮你改造。</div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:48px;padding-top:32px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)">
+    有问题？回到 Claude 继续问我 🙌
+  </div>
+
+</div>
+
+<script>
+function showPlatform(name, el) {
+  document.querySelectorAll('.platform-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.platform-steps').forEach(s => s.classList.remove('show'));
+  document.getElementById('ps-' + name).classList.add('show');
+}
+function toggleFaq(el) {
+  const a = el.nextElementSibling;
+  const ch = el.querySelector('.faq-chevron');
+  a.classList.toggle('open');
+  ch.classList.toggle('open');
+}
+</script>
+</body>
+</html>

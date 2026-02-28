@@ -1,0 +1,26 @@
+[
+  {
+    "id": "c_demo_1",
+    "city": "北京",
+    "name": "打车立减券",
+    "amount": 20,
+    "unit": "元",
+    "desc": "单笔订单满50元可用\n快车/专车通用",
+    "total": 500,
+    "remain": 127,
+    "expire": "2025-12-31",
+    "link": "https://www.didiglobal.com/coupon/bj001"
+  },
+  {
+    "id": "c_demo_2",
+    "city": "上海",
+    "name": "新人专享券",
+    "amount": 30,
+    "unit": "元",
+    "desc": "单笔订单满60元可用\n限新注册用户",
+    "total": 300,
+    "remain": 89,
+    "expire": "2025-12-31",
+    "link": "https://www.didiglobal.com/coupon/sh001"
+  }
+]
