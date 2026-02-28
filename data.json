@@ -1,26 +1,86 @@
 [
   {
-    "id": "c_demo_1",
+    "id": "c_1772259636401_u7lfd",
     "city": "北京",
     "name": "打车立减券",
     "amount": 20,
     "unit": "元",
-    "desc": "单笔订单满50元可用\n快车/专车通用",
+    "desc": "满50元可用\n快车/专车通用",
     "total": 500,
     "remain": 127,
-    "expire": "2025-12-31",
+    "expire": "2025-03-31",
     "link": "https://www.didiglobal.com/coupon/bj001"
   },
   {
-    "id": "c_demo_2",
+    "id": "c_1772259636401_6tcm8",
+    "city": "北京",
+    "name": "专车优惠包",
+    "amount": 50,
+    "unit": "元",
+    "desc": "5张×10元，满80元可用\n有效期30天",
+    "total": 200,
+    "remain": 43,
+    "expire": "2025-03-31",
+    "link": "https://www.didiglobal.com/coupon/bj002"
+  },
+  {
+    "id": "c_1772259636401_8ncqn",
     "city": "上海",
     "name": "新人专享券",
     "amount": 30,
     "unit": "元",
-    "desc": "单笔订单满60元可用\n限新注册用户",
+    "desc": "满60元可用，限新用户",
     "total": 300,
     "remain": 89,
-    "expire": "2025-12-31",
+    "expire": "2025-03-15",
     "link": "https://www.didiglobal.com/coupon/sh001"
+  },
+  {
+    "id": "c_1772259636401_xujip",
+    "city": "深圳",
+    "name": "通勤专享券",
+    "amount": 10,
+    "unit": "元",
+    "desc": "工作日早晚高峰可用",
+    "total": 800,
+    "remain": 201,
+    "expire": "2025-03-31",
+    "link": "https://www.didiglobal.com/coupon/sz001"
+  },
+  {
+    "id": "c_1772259636401_i5khi",
+    "city": "深圳",
+    "name": "豪华车型礼包",
+    "amount": 80,
+    "unit": "元",
+    "desc": "4张×20元，豪华车型专用",
+    "total": 100,
+    "remain": 18,
+    "expire": "2025-04-30",
+    "link": "https://www.didiglobal.com/coupon/sz002"
+  },
+  {
+    "id": "c_1772259636401_lfew6",
+    "city": "广州",
+    "name": "周末出行券",
+    "amount": 15,
+    "unit": "元",
+    "desc": "周六日使用，满40元可用",
+    "total": 1000,
+    "remain": 312,
+    "expire": "2025-03-31",
+    "link": "https://www.didiglobal.com/coupon/gz001"
+  },
+  {
+    "id": "c_1772259636401_fv64x",
+    "city": "成都",
+    "name": "美食出行券",
+    "amount": 12,
+    "unit": "元",
+    "desc": "满35元可用，每日限1张",
+    "total": 2000,
+    "remain": 876,
+    "expire": "2025-03-31",
+    "link": "https://www.didiglobal.com/coupon/cd001"
   }
 ]
